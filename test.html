@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Devstagram - Test Suite</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .test-case {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .test-case.passed {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+        }
+        .test-case.failed {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+        }
+        .test-name {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        h1 {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>📑 Devstagram Snatch Feature - Test Suite</h1>
+    <div id="test-results"></div>
+
+    <script>
+        // Simple test framework
+        const tests = [];
+        const results = document.getElementById('test-results');
+
+        function test(name, fn) {
+            tests.push({ name, fn });
+        }
+
+        function assert(condition, message) {
+            if (!condition) {
+                throw new Error(message || 'Assertion failed');
+            }
+        }
+
+        function assertEquals(actual, expected, message) {
+            if (actual !== expected) {
+                throw new Error(message || `Expected ${expected} but got ${actual}`);
+            }
+        }
+
+        // Test 1: LocalStorage functionality
+        test('LocalStorage should store and retrieve snatched posts', () => {
+            localStorage.clear();
+            const testPost = { id: 1, username: 'testuser', caption: 'test' };
+            const posts = [testPost];
+            
+            localStorage.setItem('snatchedPosts', JSON.stringify(posts));
+            const retrieved = JSON.parse(localStorage.getItem('snatchedPosts'));
+            
+            assertEquals(retrieved.length, 1, 'Should have 1 post');
+            assertEquals(retrieved[0].id, 1, 'Post ID should be 1');
+            assertEquals(retrieved[0].username, 'testuser', 'Username should match');
+        });
+
+        // Test 2: Empty state
+        test('Empty snatchedPosts should return empty array', () => {
+            localStorage.clear();
+            const posts = JSON.parse(localStorage.getItem('snatchedPosts') || '[]');
+            assertEquals(posts.length, 0, 'Should have 0 posts');
+        });
+
+        // Test 3: Adding multiple posts
+        test('Should be able to store multiple snatched posts', () => {
+            localStorage.clear();
+            const posts = [
+                { id: 1, username: 'user1' },
+                { id: 2, username: 'user2' },
+                { id: 3, username: 'user3' }
+            ];
+            
+            localStorage.setItem('snatchedPosts', JSON.stringify(posts));
+            const retrieved = JSON.parse(localStorage.getItem('snatchedPosts'));
+            
+            assertEquals(retrieved.length, 3, 'Should have 3 posts');
+        });
+
+        // Test 4: Removing a post
+        test('Should be able to remove a snatched post', () => {
+            localStorage.clear();
+            let posts = [
+                { id: 1, username: 'user1' },
+                { id: 2, username: 'user2' },
+                { id: 3, username: 'user3' }
+            ];
+            
+            localStorage.setItem('snatchedPosts', JSON.stringify(posts));
+            
+            // Remove post with id 2
+            posts = posts.filter(p => p.id !== 2);
+            localStorage.setItem('snatchedPosts', JSON.stringify(posts));
+            
+            const retrieved = JSON.parse(localStorage.getItem('snatchedPosts'));
+            assertEquals(retrieved.length, 2, 'Should have 2 posts after removal');
+            assert(!retrieved.some(p => p.id === 2), 'Post with id 2 should be removed');
+        });
+
+        // Test 5: Finding a snatched post
+        test('Should be able to check if a post is snatched', () => {
+            localStorage.clear();
+            const posts = [
+                { id: 1, username: 'user1' },
+                { id: 2, username: 'user2' }
+            ];
+            
+            localStorage.setItem('snatchedPosts', JSON.stringify(posts));
+            const retrieved = JSON.parse(localStorage.getItem('snatchedPosts'));
+            
+            const isSnatched = retrieved.some(p => p.id === 1);
+            const isNotSnatched = retrieved.some(p => p.id === 999);
+            
+            assert(isSnatched, 'Post with id 1 should be found');
+            assert(!isNotSnatched, 'Post with id 999 should not be found');
+        });
+
+        // Run all tests
+        function runTests() {
+            let passed = 0;
+            let failed = 0;
+
+            tests.forEach(({ name, fn }) => {
+                const testDiv = document.createElement('div');
+                testDiv.className = 'test-case';
+                
+                const nameDiv = document.createElement('div');
+                nameDiv.className = 'test-name';
+                nameDiv.textContent = name;
+                testDiv.appendChild(nameDiv);
+
+                try {
+                    fn();
+                    testDiv.classList.add('passed');
+                    const resultDiv = document.createElement('div');
+                    resultDiv.textContent = '✅ PASSED';
+                    testDiv.appendChild(resultDiv);
+                    passed++;
+                } catch (error) {
+                    testDiv.classList.add('failed');
+                    const resultDiv = document.createElement('div');
+                    resultDiv.textContent = `❌ FAILED: ${error.message}`;
+                    testDiv.appendChild(resultDiv);
+                    failed++;
+                }
+
+                results.appendChild(testDiv);
+            });
+
+            // Summary
+            const summary = document.createElement('div');
+            summary.style.marginTop = '30px';
+            summary.style.padding = '20px';
+            summary.style.backgroundColor = failed === 0 ? '#d4edda' : '#fff3cd';
+            summary.style.borderRadius = '8px';
+            summary.innerHTML = `
+                <h2>Test Summary</h2>
+                <p><strong>Total:</strong> ${tests.length}</p>
+                <p><strong>Passed:</strong> ${passed} ✅</p>
+                <p><strong>Failed:</strong> ${failed} ❌</p>
+            `;
+            results.appendChild(summary);
+        }
+
+        // Run tests on load
+        runTests();
+
+        // Clean up after tests
+        localStorage.clear();
+    </script>
+</body>
+</html>
