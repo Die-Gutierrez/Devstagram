@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Devstagram - Developer Social Network</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>📸 Devstagram</h1>
+            <nav>
+                <a href="#" id="snatched-link">My Snatched Posts (<span id="snatch-count">0</span>)</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <div id="feed" class="feed">
+            <!-- Posts will be dynamically added here -->
+        </div>
+
+        <div id="snatched-view" class="snatched-view hidden">
+            <h2>My Snatched Posts</h2>
+            <div id="snatched-posts" class="feed">
+                <!-- Snatched posts will appear here -->
+            </div>
+        </div>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
